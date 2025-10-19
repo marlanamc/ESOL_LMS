@@ -111,11 +111,15 @@
                 <div class="teacher-tools">
                     <form method="POST" action="{{ url_for('reset_student_password') }}" class="password-reset-form">
                         <h3>Reset Student Password</h3>
-                        <div class="form-row">
-                            <input type="text" name="username" placeholder="Student username" required>
-                            <input type="password" name="new_password" placeholder="New password" required>
-                            <button type="submit">Reset Password</button>
+                        <div class="form-group">
+                            <label for="username">Student Username:</label>
+                            <input type="text" id="username" name="username" placeholder="Enter student username" required>
                         </div>
+                        <div class="form-group">
+                            <label for="new_password">New Password:</label>
+                            <input type="password" id="new_password" name="new_password" placeholder="Enter new password" required>
+                        </div>
+                        <button type="submit" class="reset-button">Reset Password</button>
                     </form>
                 </div>
             </div>

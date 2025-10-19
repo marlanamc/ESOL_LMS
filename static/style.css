@@ -428,23 +428,55 @@ button:hover {
 .password-reset-form h3 {
     margin-top: 0;
     color: var(--secondary-color);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
 }
 
-.form-row {
-    display: flex;
-    gap: 1rem;
-    align-items: end;
+.password-reset-form .form-group {
+    margin-bottom: 1.5rem;
 }
 
-.form-row input {
-    flex: 1;
-    margin-bottom: 0;
+.password-reset-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
 }
 
-.form-row button {
-    flex: 0 0 auto;
-    padding: 0.5rem 1rem;
-    margin-bottom: 0;
+.password-reset-form input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.password-reset-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.reset-button {
+    background-color: var(--warning-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.reset-button:hover {
+    background-color: #b45309;
 }
 
 .dashboard-stats {
