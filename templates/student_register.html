@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration - ESOL Quiz System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ESOL Quiz System</h1>
+            <h2>Student Registration</h2>
+        </header>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-error">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" class="login-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required placeholder="Choose a unique username">
+                <small>Must be at least 3 characters long</small>
+            </div>
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required placeholder="Choose a password">
+                <small>Must be at least 4 characters long</small>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Already have an account? <a href="{{ url_for('student_login') }}">Login here</a></p>
+            <p><a href="{{ url_for('teacher_login') }}">Teacher Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

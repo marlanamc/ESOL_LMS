@@ -61,26 +61,47 @@ h1 {
     padding-left: 1.5rem;
 }
 
-.name-input {
+.student-info {
     margin-bottom: 2rem;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
 }
 
-.name-input label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
+.student-info p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.auth-links p {
+    margin: 0.5rem 0;
+}
+
+.auth-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.student-controls {
+    margin-top: 1rem;
     text-align: center;
 }
 
-.name-input input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 1rem;
+.alert-info {
+    background-color: #dbeafe;
+    color: #1e40af;
 }
 
 .verb-section {
@@ -127,6 +148,20 @@ h1 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+}
+
+.download-button {
+    padding: 0.5rem 1rem;
+    background-color: #059669;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease;
+}
+
+.download-button:hover {
+    background-color: #047857;
 }
 
 .logout-button {
@@ -245,6 +280,12 @@ button:hover {
     margin: 1rem 0 2rem;
 }
 
+.score-detail {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
 .high-score {
     background-color: #ecfdf5;
     color: var(--success-color);
@@ -334,6 +375,35 @@ button:hover {
     font-size: 0.8rem;
     color: #64748b;
     margin-top: 0.25rem;
+}
+
+.teacher-tools {
+    background-color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.password-reset-form h3 {
+    margin-top: 0;
+    color: var(--secondary-color);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+}
+
+.form-row input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-row button {
+    flex: 0 0 auto;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0;
 }
 
 .dashboard-stats {

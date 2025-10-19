@@ -18,9 +18,18 @@
                         {% endfor %}
                     </select>
                 </form>
+                <a href="{{ url_for('download_csv', week=selected_week) }}" class="download-button">Download CSV</a>
                 <a href="{{ url_for('teacher_logout') }}" class="logout-button">Logout</a>
             </div>
         </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         {% if error %}
             <div class="alert alert-error">{{ error }}</div>
@@ -94,6 +103,20 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Student Management</h2>
+                <div class="teacher-tools">
+                    <form method="POST" action="{{ url_for('reset_student_password') }}" class="password-reset-form">
+                        <h3>Reset Student Password</h3>
+                        <div class="form-row">
+                            <input type="text" name="username" placeholder="Student username" required>
+                            <input type="password" name="new_password" placeholder="New password" required>
+                            <button type="submit">Reset Password</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         {% endif %}

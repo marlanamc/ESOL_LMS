@@ -10,7 +10,10 @@
         <header>
             <h1>Marlie's ESOL 3B Class</h1>
             <h2>Irregular Verb Quizzes</h2>
-            <p class="subtitle">Select a quiz to begin</p>
+            <p class="subtitle">Welcome, {{ student_name }}! Select a quiz to begin</p>
+            <div class="student-controls">
+                <a href="{{ url_for('student_logout') }}" class="logout-button">Logout</a>
+            </div>
         </header>
 
         <div class="quiz-list">

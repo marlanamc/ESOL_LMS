@@ -11,6 +11,7 @@
             <h1>Quiz Results</h1>
             <div class="score-banner {% if score >= 80 %}high-score{% elif score >= 60 %}medium-score{% else %}low-score{% endif %}">
                 <h2>{{ student_name }}'s Score: {{ "%.1f"|format(score) }}%</h2>
+                <p class="score-detail">{{ correct_answers }} out of {{ total_questions }} correct</p>
             </div>
         </header>
 
