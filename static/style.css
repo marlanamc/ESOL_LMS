@@ -138,7 +138,7 @@ h1 {
 
 /* Login Form */
 .login-form {
-    max-width: 500px;
+    max-width: 600px;
     margin: 0 auto;
 }
 
@@ -152,6 +152,7 @@ h1 {
     font-size: 1.1rem;
     min-height: 50px;
     width: 100%;
+    max-width: 100%;
     border: 2px solid #e2e8f0;
     border-radius: 6px;
     font-family: 'Poppins', sans-serif;
@@ -168,6 +169,18 @@ h1 {
 .login-form select {
     background-color: white;
     cursor: pointer;
+}
+
+/* Ensure form elements take full width */
+.login-form .form-group {
+    width: 100%;
+}
+
+.login-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
 }
 
 /* Dashboard Styles */
