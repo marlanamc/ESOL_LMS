@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container dashboard">
+        <header class="dashboard-header">
+            <h1>Teacher Dashboard</h1>
+            <div class="header-controls">
+                <form class="week-filter">
+                    <select name="week" onchange="this.form.submit()">
+                        <option value="all" {% if selected_week == 'all' %}selected{% endif %}>All Weeks</option>
+                        {% for week in all_weeks %}
+                        <option value="{{ week }}" {% if selected_week == week %}selected{% endif %}>{{ week }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <a href="{{ url_for('teacher_logout') }}" class="logout-button">Logout</a>
+            </div>
+        </header>
+
+        {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+        {% else %}
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <p class="stat-number">{{ total_students }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Score</h3>
+                    <p class="stat-number">{{ average_score }}%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Quizzes</h3>
+                    <p class="stat-number">{{ total_quizzes }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Passing Rate</h3>
+                    <p class="stat-number">{{ passing_rate }}%</p>
+                    <p class="stat-detail">({{ total_passing }} passed)</p>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Recent Results</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Student</th>
+                                <th>Score</th>
+                                <th>Week</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in recent_results %}
+                            <tr>
+                                <td>{{ result.Date }}</td>
+                                <td>{{ result.Student }}</td>
+                                <td>{{ "%.1f"|format(result.Score) }}%</td>
+                                <td>{{ result.Week }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Student Averages</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Average Score</th>
+                                <th>Quizzes Taken</th>
+                                <th>Weeks Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student, stats in student_averages.items() %}
+                            <tr>
+                                <td>{{ student }}</td>
+                                <td>{{ "%.1f"|format(stats.mean) }}%</td>
+                                <td>{{ stats.count }}</td>
+                                <td>{{ stats.weeks }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

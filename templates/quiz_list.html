@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Irregular Verb Quizzes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Marlie's ESOL 3B Class</h1>
+            <h2>Irregular Verb Quizzes</h2>
+            <p class="subtitle">Select a quiz to begin</p>
+        </header>
+
+        <div class="quiz-list">
+            {% for week, quiz_data in quizzes.items()|reverse %}
+            <div class="quiz-card">
+                <h2>{{ week }}</h2>
+                <p class="due-date"><strong>Due:</strong> {{ quiz_data.due_date }}</p>
+                <div class="verb-preview">
+                    <strong>Verbs:</strong>
+                    {% for verb in quiz_data.verbs.keys() %}
+                        <span class="verb-tag">{{ verb }}</span>{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('take_quiz', week=week) }}" class="start-quiz-button">Start Quiz</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

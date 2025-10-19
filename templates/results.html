@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quiz Results</h1>
+            <div class="score-banner {% if score >= 80 %}high-score{% elif score >= 60 %}medium-score{% else %}low-score{% endif %}">
+                <h2>{{ student_name }}'s Score: {{ "%.1f"|format(score) }}%</h2>
+            </div>
+        </header>
+
+        {% for result in results %}
+        <div class="result-section">
+            <h3>To {{ verb }}</h3>
+            <div class="result-grid">
+                <div class="form-result {% if result.answers[0] == result.correct[0] %}correct{% else %}incorrect{% endif %}">
+                    <span class="form-label">V1:</span>
+                    <span class="student-answer">Your answer: {{ result.answers[0] }}</span>
+                    <span class="correct-answer">Correct: {{ result.correct[0] }}</span>
+                </div>
+                <div class="form-result {% if result.answers[1] == result.correct[1] %}correct{% else %}incorrect{% endif %}">
+                    <span class="form-label">V1-3rd:</span>
+                    <span class="student-answer">Your answer: {{ result.answers[1] }}</span>
+                    <span class="correct-answer">Correct: {{ result.correct[1] }}</span>
+                </div>
+                <div class="form-result {% if result.answers[2] == result.correct[2] %}correct{% else %}incorrect{% endif %}">
+                    <span class="form-label">V1-ing:</span>
+                    <span class="student-answer">Your answer: {{ result.answers[2] }}</span>
+                    <span class="correct-answer">Correct: {{ result.correct[2] }}</span>
+                </div>
+                <div class="form-result {% if result.answers[3] == result.correct[3] %}correct{% else %}incorrect{% endif %}">
+                    <span class="form-label">V2:</span>
+                    <span class="student-answer">Your answer: {{ result.answers[3] }}</span>
+                    <span class="correct-answer">Correct: {{ result.correct[3] }}</span>
+                </div>
+                <div class="form-result {% if result.answers[4] == result.correct[4] %}correct{% else %}incorrect{% endif %}">
+                    <span class="form-label">V3:</span>
+                    <span class="student-answer">Your answer: {{ result.answers[4] }}</span>
+                    <span class="correct-answer">Correct: {{ result.correct[4] }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="actions">
+            <a href="{{ url_for('index') }}" class="try-again-button">Try Another Quiz</a>
+        </div>
+    </div>
+</body>
+</html>
