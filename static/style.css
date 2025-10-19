@@ -138,8 +138,36 @@ h1 {
 
 /* Login Form */
 .login-form {
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
+}
+
+.login-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.login-form input,
+.login-form select {
+    padding: 1rem;
+    font-size: 1.1rem;
+    min-height: 50px;
+    width: 100%;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+}
+
+.login-form input:focus,
+.login-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.login-form select {
+    background-color: white;
+    cursor: pointer;
 }
 
 /* Dashboard Styles */

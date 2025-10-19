@@ -182,8 +182,9 @@ def student_register():
         username = request.form['username'].strip().lower()
         password = request.form['password']
         name = request.form['name'].strip()
+        teacher = request.form['teacher'].strip()
         
-        if not username or not password or not name:
+        if not username or not password or not name or not teacher:
             flash('All fields are required')
             return render_template('student_register.html')
         
@@ -204,6 +205,7 @@ def student_register():
         # Create new student
         students[username] = {
             'name': name,
+            'teacher': teacher,
             'password': hash_password(password),
             'created': datetime.now().strftime("%Y-%m-%d %H:%M")
         }
