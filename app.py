@@ -1,63 +1,120 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
-from functools import wraps
-import pandas as pd
-from datetime import datetime
+import hashlib
+import io
 import json
 import os
-import io
-import hashlib
 import secrets
+from datetime import datetime
+from functools import wraps
+from typing import Any, Dict, List, Optional, Union
 
+import pandas as pd
+from flask import (
+    Flask,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
+)
+from werkzeug.wrappers import Response
+
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-TEACHER_PASSWORD = os.getenv('TEACHER_PASSWORD')  # Get the password from an environment variable
+TEACHER_PASSWORD = os.getenv('TEACHER_PASSWORD')
 
-def load_quizzes():
-    file_path = os.path.join(os.path.dirname(__file__), 'quizzes.json')
+
+# --- Helper Functions ---
+
+def load_json_data(filename: str, default: Any = None) -> Any:
+    """
+    Load data from a JSON file.
+    
+    Args:
+        filename: Name of the JSON file to load.
+        default: Value to return if file is not found or invalid.
+        
+    Returns:
+        The loaded data or the default value.
+    """
+    if default is None:
+        default = {}
+        
+    file_path = os.path.join(os.path.dirname(__file__), filename)
     try:
         with open(file_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Error: quizzes.json not found at {file_path}")
-        return {}
+        print(f"Warning: {filename} not found at {file_path}")
+        return default
     except json.JSONDecodeError:
-        print("Error: Invalid JSON format in quizzes.json")
-        return {}
+        print(f"Error: Invalid JSON format in {filename}")
+        return default
 
-WEEKLY_QUIZZES = load_quizzes()
-
-def load_students():
-    """Load student data from JSON file"""
-    file_path = os.path.join(os.path.dirname(__file__), 'students.json')
-    try:
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError:
-        return {}
-
-def save_students(students):
-    """Save student data to JSON file"""
-    file_path = os.path.join(os.path.dirname(__file__), 'students.json')
+def save_json_data(filename: str, data: Any) -> None:
+    """
+    Save data to a JSON file.
+    
+    Args:
+        filename: Name of the JSON file to save to.
+        data: Data to save.
+    """
+    file_path = os.path.join(os.path.dirname(__file__), filename)
     with open(file_path, 'w') as f:
-        json.dump(students, f, indent=2)
+        json.dump(data, f, indent=2)
 
-def hash_password(password):
-    """Hash password with salt"""
+def load_quizzes() -> Dict[str, Any]:
+    """Load quiz data from quizzes.json."""
+    return load_json_data('quizzes.json', {})
+
+def load_students() -> Dict[str, Any]:
+    """Load student data from students.json."""
+    return load_json_data('students.json', {})
+
+def save_students(students: Dict[str, Any]) -> None:
+    """Save student data to students.json."""
+    save_json_data('students.json', students)
+
+def hash_password(password: str) -> str:
+    """
+    Hash a password with a random salt using PBKDF2.
+    
+    Args:
+        password: The plain text password.
+        
+    Returns:
+        The hashed password string including the salt.
+    """
     salt = secrets.token_hex(16)
     return hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000).hex() + ':' + salt
 
-def verify_password(stored_password, provided_password):
-    """Verify password against stored hash"""
+def verify_password(stored_password: str, provided_password: str) -> bool:
+    """
+    Verify a provided password against a stored hash.
+    
+    Args:
+        stored_password: The stored hash (including salt).
+        provided_password: The plain text password to verify.
+        
+    Returns:
+        True if the password matches, False otherwise.
+    """
     try:
         password_hash, salt = stored_password.split(':')
         return password_hash == hashlib.pbkdf2_hmac('sha256', provided_password.encode(), salt.encode(), 100000).hex()
     except ValueError:
         return False
 
+# Load quizzes once at startup
+WEEKLY_QUIZZES = load_quizzes()
+
+
+# --- Decorators ---
+
 def student_required(f):
-    """Decorator to require student login"""
+    """Decorator to require student login for a route."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('student_id'):
@@ -66,6 +123,7 @@ def student_required(f):
     return decorated_function
 
 def teacher_required(f):
+    """Decorator to require teacher login for a route."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('is_teacher'):
@@ -73,24 +131,35 @@ def teacher_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+# --- Routes ---
+
 @app.route('/')
-def index():
-    # Check if student is logged in
+def index() -> Union[str, Response]:
+    """
+    Render the main dashboard for students.
+    Shows list of available quizzes and due dates.
+    """
     if not session.get('student_id'):
         return redirect(url_for('student_login'))
     
-    # Format the due dates
-    print("Rendering quiz list")
+    # Format the due dates for display
     formatted_quizzes = {}
     for week, data in WEEKLY_QUIZZES.items():
-        due_date = datetime.strptime(data['due_date'], '%Y-%m-%d')
-        formatted_due_date = due_date.strftime('Due %A, %B %d, %Y')
-        formatted_quizzes[week] = {
-            'due_date': formatted_due_date,
-            'verbs': data['verbs']
-        }
+        try:
+            due_date = datetime.strptime(data['due_date'], '%Y-%m-%d')
+            formatted_due_date = due_date.strftime('Due %A, %B %d, %Y')
+            formatted_quizzes[week] = {
+                'due_date': formatted_due_date,
+                'verbs': data['verbs']
+            }
+        except ValueError:
+            # Handle potentially malformed dates gracefully
+            formatted_quizzes[week] = {
+                'due_date': data['due_date'],
+                'verbs': data['verbs']
+            }
     
-    # Get student name for display
     students = load_students()
     student_name = students.get(session['student_id'], {}).get('name', 'Student')
     
@@ -98,14 +167,19 @@ def index():
 
 @app.route('/quiz/<week>')
 @student_required
-def take_quiz(week):
+def take_quiz(week: str) -> Union[str, Response]:
+    """
+    Render the quiz page for a specific week.
+    """
     if week in WEEKLY_QUIZZES:
         quiz_data = WEEKLY_QUIZZES[week]
-        # Parse and format the due date
-        due_date = datetime.strptime(quiz_data['due_date'], '%Y-%m-%d')
-        formatted_due_date = due_date.strftime('%B %d, %Y')
         
-        # Get student name
+        try:
+            due_date = datetime.strptime(quiz_data['due_date'], '%Y-%m-%d')
+            formatted_due_date = due_date.strftime('%B %d, %Y')
+        except ValueError:
+            formatted_due_date = quiz_data['due_date']
+        
         students = load_students()
         student_name = students.get(session['student_id'], {}).get('name', 'Student')
         
@@ -114,33 +188,38 @@ def take_quiz(week):
                              due_date=formatted_due_date,
                              verbs=quiz_data['verbs'],
                              student_name=student_name)
+    
     return redirect(url_for('index'))
 
 @app.route('/submit', methods=['POST'])
 @student_required
-def submit():
-    week = request.form.get('week')  # Get the week from the form
+def submit() -> Union[str, Response]:
+    """
+    Handle quiz submission.
+    Grades the quiz, saves results to CSV, and shows the results page.
+    """
+    week = request.form.get('week')
 
-    # Make sure we're using the correct week's quiz data
     if week not in WEEKLY_QUIZZES:
         flash('Invalid quiz week selected.')
         return redirect(url_for('index'))
 
-    # Get student name from session
     students = load_students()
     student_name = students.get(session['student_id'], {}).get('name', 'Student')
+    verbs = WEEKLY_QUIZZES[week]['verbs']
 
-    verbs = WEEKLY_QUIZZES[week]['verbs']  # Get the verbs for this specific week
-
+    # Grading logic
     score = 0
     results = []
     total_questions = len(verbs) * 5
 
-    for verb in verbs:
+    for verb, correct_forms in verbs.items():
         verb_results = {'verb': verb, 'answers': [], 'correct': []}
+        
+        # Check each of the 5 verb forms
         for form in ['v1', 'v1_3rd', 'v1_ing', 'v2', 'v3']:
             student_answer = request.form.get(f'{verb}_{form}', '').strip().lower()
-            correct_answer = verbs[verb][form].strip().lower()
+            correct_answer = correct_forms[form].strip().lower()
 
             if student_answer == correct_answer:
                 score += 1
@@ -152,7 +231,9 @@ def submit():
 
     final_score = (score / total_questions) * 100 if total_questions > 0 else 0
 
-    # Save to CSV
+    # Save results to CSV
+    # We use a CSV file for simple, persistent storage of quiz results.
+    # In a production app, this would likely be a database table.
     try:
         df = pd.read_csv('quiz_results.csv')
     except FileNotFoundError:
@@ -177,14 +258,15 @@ def submit():
                          correct_answers=score)
 
 @app.route('/student/register', methods=['GET', 'POST'])
-def student_register():
+def student_register() -> Union[str, Response]:
+    """Handle student registration."""
     if request.method == 'POST':
         username = request.form['username'].strip().lower()
         password = request.form['password']
         name = request.form['name'].strip()
         teacher = request.form['teacher'].strip()
         
-        if not username or not password or not name or not teacher:
+        if not all([username, password, name, teacher]):
             flash('All fields are required')
             return render_template('student_register.html')
         
@@ -202,7 +284,6 @@ def student_register():
             flash('Username already exists')
             return render_template('student_register.html')
         
-        # Create new student
         students[username] = {
             'name': name,
             'teacher': teacher,
@@ -217,7 +298,8 @@ def student_register():
     return render_template('student_register.html')
 
 @app.route('/student/login', methods=['GET', 'POST'])
-def student_login():
+def student_login() -> Union[str, Response]:
+    """Handle student login."""
     if request.method == 'POST':
         username = request.form['username'].strip().lower()
         password = request.form['password']
@@ -234,13 +316,15 @@ def student_login():
     return render_template('student_login.html')
 
 @app.route('/student/logout')
-def student_logout():
+def student_logout() -> Response:
+    """Handle student logout."""
     session.pop('student_id', None)
     flash('You have been logged out')
     return redirect(url_for('student_login'))
 
 @app.route('/teacher/login', methods=['GET', 'POST'])
-def teacher_login():
+def teacher_login() -> Union[str, Response]:
+    """Handle teacher login."""
     if request.method == 'POST':
         if request.form['password'] == TEACHER_PASSWORD:
             session['is_teacher'] = True
@@ -250,32 +334,36 @@ def teacher_login():
     return render_template('teacher_login.html')
 
 @app.route('/teacher/logout')
-def teacher_logout():
+def teacher_logout() -> Response:
+    """Handle teacher logout."""
     session.pop('is_teacher', None)
     return redirect(url_for('index'))
 
 @app.route('/teacher/dashboard')
 @teacher_required
-def teacher_dashboard():
+def teacher_dashboard() -> str:
+    """
+    Render the teacher dashboard.
+    Aggregates statistics from quiz_results.csv.
+    """
     try:
         df = pd.read_csv('quiz_results.csv')
-        selected_week = request.args.get('week', 'all')  # Get selected week from URL parameter
+        selected_week = request.args.get('week', 'all')
 
-        # Get list of all weeks for dropdown
         all_weeks = sorted(df['Week'].unique())
 
-        # Filter by week if one is selected
         if selected_week != 'all':
             filtered_df = df[df['Week'] == selected_week]
         else:
             filtered_df = df
 
-        # Calculate statistics
+        # Calculate high-level stats
         total_students = len(filtered_df['Student'].unique())
         average_score = filtered_df['Score'].mean()
         recent_results = filtered_df.tail(10).sort_values(by='Date', ascending=False)
 
-        # Group by student and get their average scores
+        # Aggregate student performance
+        # We group by student to get their average score and list of weeks completed
         student_averages = filtered_df.groupby('Student').agg({
             'Score': ['mean', 'count'],
             'Week': lambda x: ', '.join(sorted(set(x)))
@@ -283,7 +371,6 @@ def teacher_dashboard():
         student_averages.columns = ['mean', 'count', 'weeks']
         student_averages = student_averages.sort_values(by='mean', ascending=False)
 
-        # Calculate totals
         total_quizzes = len(filtered_df)
         total_passing = len(filtered_df[filtered_df['Score'] >= 70])
         passing_rate = (total_passing / total_quizzes * 100) if total_quizzes > 0 else 0
@@ -304,12 +391,14 @@ def teacher_dashboard():
 
 @app.route('/teacher/download_csv')
 @teacher_required
-def download_csv():
+def download_csv() -> Union[Response, str]:
+    """
+    Generate and download a CSV of quiz results.
+    """
     try:
         df = pd.read_csv('quiz_results.csv')
         selected_week = request.args.get('week', 'all')
         
-        # Filter by week if one is selected
         if selected_week != 'all':
             filtered_df = df[df['Week'] == selected_week]
             filename = f'quiz_results_{selected_week.replace(" ", "_")}.csv'
@@ -317,12 +406,11 @@ def download_csv():
             filtered_df = df
             filename = 'quiz_results_all_weeks.csv'
         
-        # Create CSV in memory
+        # Write CSV to memory buffer
         output = io.StringIO()
         filtered_df.to_csv(output, index=False)
         output.seek(0)
         
-        # Create BytesIO object for sending
         mem = io.BytesIO()
         mem.write(output.getvalue().encode('utf-8'))
         mem.seek(0)
@@ -339,7 +427,10 @@ def download_csv():
 
 @app.route('/teacher/reset_password', methods=['POST'])
 @teacher_required
-def reset_student_password():
+def reset_student_password() -> Response:
+    """
+    Allow teachers to reset a student's password.
+    """
     username = request.form['username'].strip().lower()
     new_password = request.form['new_password']
     
@@ -363,4 +454,4 @@ def reset_student_password():
     return redirect(url_for('teacher_dashboard'))
 
 if __name__ == '__main__':
-    app
+    app.run(debug=True)
