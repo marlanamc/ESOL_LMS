@@ -59,6 +59,49 @@ Follow these steps to run the application locally:
 6.  **Access the app**
     *   Open `http://127.0.0.1:5000` in your browser.
 
+## Deployment to PythonAnywhere
+
+This application is designed to run on PythonAnywhere. Follow these steps to deploy:
+
+1.  **Upload files**
+    *   Go to the **Files** tab in PythonAnywhere.
+    *   Upload all project files to your desired directory (e.g., `/home/yourusername/ESOL_LMS`).
+
+2.  **Install dependencies**
+    *   Open a **Bash console** from the Consoles tab.
+    *   Navigate to your project directory:
+        ```bash
+        cd ~/ESOL_LMS
+        ```
+    *   Install required packages:
+        ```bash
+        pip3.10 install --user -r requirements.txt
+        ```
+
+3.  **Configure the web app**
+    *   Go to the **Web** tab.
+    *   Click **Add a new web app**.
+    *   Select **Manual configuration** and choose **Python 3.10**.
+    *   In the **Code** section, set the source code directory to `/home/yourusername/ESOL_LMS`.
+    *   Click on the WSGI configuration file link and update it to point to your `app.py`:
+        ```python
+        import sys
+        path = '/home/yourusername/ESOL_LMS'
+        if path not in sys.path:
+            sys.path.append(path)
+        
+        from app import app as application
+        ```
+
+4.  **Set environment variables**
+    *   In the **Web** tab, scroll to the **Environment variables** section.
+    *   Add: `TEACHER_PASSWORD` with your chosen secure password.
+
+5.  **Reload and test**
+    *   Click the **Reload** button at the top of the Web tab.
+    *   Visit your app at `https://yourusername.pythonanywhere.com`.
+    *   Check the **Error log** if you encounter any issues.
+
 ## Project Structure
 
 *   `app.py`: Main Flask application containing routes and logic.
